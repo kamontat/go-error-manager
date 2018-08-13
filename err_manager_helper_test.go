@@ -5,7 +5,7 @@ import (
 	"math/rand"
 	"strconv"
 
-	. "github.com/kamontat/err-manager"
+	. "github.com/kamontat/go-error-manager"
 )
 
 type Helper struct {

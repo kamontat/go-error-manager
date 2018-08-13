@@ -1,7 +1,7 @@
 package manager_test
 
 import (
-	"github.com/kamontat/err-manager"
+	manager "github.com/kamontat/go-error-manager"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
