@@ -27,7 +27,8 @@ var errorManager = New()
 
 // StartNewManageError will return new default ErrManager
 func StartNewManageError() *ErrManager {
-	return errorManager.Reset()
+	errorManager = New()
+	return errorManager
 }
 
 // StartManageError will return default ErrManager
