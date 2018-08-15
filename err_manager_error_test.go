@@ -71,7 +71,19 @@ var ErrorTestFunction = func(helper *Helper) func() {
 			helper.SaveErrorManagerState(newEM)
 		})
 
-		It("2.1) next: try to throw error", func() {
+		It("2.1) run 'E2P' and error be set", func() {
+			helper.StartTestCase()
+
+			Expect(helper.ErrorManager.HaveError()).To(BeFalse())
+			newEM := helper.ErrorManager.E2P(helper.RunResultWithError())
+			Expect(newEM.HaveError()).To(BeTrue())
+
+			Expect(newEM).To(BeIdenticalTo(helper.ErrorManager))
+
+			helper.SaveErrorManagerState(newEM)
+		})
+
+		It("2.2) next: try to throw error", func() {
 			helper.StartTestCaseWithPreviousState()
 
 			Expect(helper.ErrorManager.HaveError()).To(BeTrue())
@@ -82,7 +94,7 @@ var ErrorTestFunction = func(helper *Helper) func() {
 			helper.SaveObject(*throw)
 		})
 
-		It("2.2) next: try to validate throwable with error object", func() {
+		It("2.3) next: try to validate throwable with error object", func() {
 			helper.StartTestCase()
 			throw, ok := helper.GetObject().(manager.Throwable)
 			Expect(ok).To(BeTrue())
@@ -91,7 +103,7 @@ var ErrorTestFunction = func(helper *Helper) func() {
 			Expect(throw.GetMessage()).ShouldNot(BeEmpty())
 		})
 
-		It("2.3) next: cast Throwable to ErrorManager", func() {
+		It("2.4) next: cast Throwable to ErrorManager", func() {
 			helper.StartTestCase()
 			throw, ok := helper.GetObject().(manager.Throwable)
 			Expect(ok).To(BeTrue())
@@ -110,11 +122,21 @@ var ErrorTestFunction = func(helper *Helper) func() {
 			Expect(newEM.HaveError()).To(BeTrue())
 
 			Expect(newEM).To(BeEquivalentTo(helper.ErrorManager))
+		})
+
+		It("3.1) run 'E1P' and throw error", func() {
+			helper.StartTestCase()
+
+			Expect(helper.ErrorManager.HaveError()).To(BeFalse())
+			newEM := helper.ErrorManager.E1P(helper.RunWithError())
+			Expect(newEM.HaveError()).To(BeTrue())
+
+			Expect(newEM).To(BeEquivalentTo(helper.ErrorManager))
 
 			helper.SaveErrorManagerState(newEM)
 		})
 
-		It("3.1) next: try to throw error", func() {
+		It("3.2) next: try to throw error", func() {
 			helper.StartTestCaseWithPreviousState()
 
 			Expect(helper.ErrorManager.HaveError()).To(BeTrue())
@@ -125,7 +147,7 @@ var ErrorTestFunction = func(helper *Helper) func() {
 			helper.SaveObject(*throw)
 		})
 
-		It("3.2) next: try to validate throwable with error object", func() {
+		It("3.3) next: try to validate throwable with error object", func() {
 			helper.StartTestCase()
 			throw, ok := helper.GetObject().(manager.Throwable)
 			Expect(ok).To(BeTrue())

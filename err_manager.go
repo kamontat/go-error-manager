@@ -46,10 +46,20 @@ func ResetError() *ErrManager {
 	return errorManager.Reset()
 }
 
+// E1P is short name of ExecuteWith1Parameters
+func (e *ErrManager) E1P(err error) *ErrManager {
+	return e.ExecuteWith1Parameters(err)
+}
+
 // ExecuteWith1Parameters is method that call with function that return 1 parameter
 func (e *ErrManager) ExecuteWith1Parameters(err error) *ErrManager {
 	e.AddNewError(err)
 	return e
+}
+
+// E2P is short name of ExecuteWith2Parameters
+func (e *ErrManager) E2P(result interface{}, err error) *ErrManager {
+	return e.ExecuteWith2Parameters(result, err)
 }
 
 // ExecuteWith2Parameters is method that call with function that return 2 parameters
