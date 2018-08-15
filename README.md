@@ -12,8 +12,9 @@ The principle of the code is always continue and chainable. Most of the function
 
 1. The Error manager (`ErrManager`) is **Singleton**, you can get it from
     1. `StartManageError()` normal singleton getter
-    2. `UpdateByThrowable(throwable)` if you have `Throwable` object
-    3. `ResetError()` which will return reseted manager.
+    2. `StartNewManageError()` normal singleton getter with `Reset` errors
+    3. `UpdateByThrowable(throwable)` if you have `Throwable` object
+    4. `ResetError()` which will return reseted manager.
 2. After that, several method that can chain
     1. `ExecuteWith1Parameters(func)` for run function with 1 return; **error**
     2. `ExecuteWith2Parameters(func)` for run function with 2 return; **result** and **error**
@@ -35,10 +36,7 @@ The principle of the code is always continue and chainable. Most of the function
 5. Throwable also have several function for you
     1. `CanBeThrow()` it checker this object can throw (mean error occurred)
     2. `GetMessage()` return the format message
-    3. `ListErrors()` get the list of errors that save in Error manager
-    4. `Exit()` will call `os.Exit(1)` if this can be throw
-    5. `ExitWithCode(int)` customize the code and call `Exit()`
-
-## Test
-
-I write the test cover all of the code. (98.6%)
+    3. `ShowMessage(writer)` show message to `io.Writer`, you can pass `nil` to able default writer
+    4. `ListErrors()` get the list of errors that save in Error manager
+    5. `Exit()` will call `os.Exit(1)` if this can be throw
+    6. `ExitWithCode(int)` customize the code and call `Exit()`
