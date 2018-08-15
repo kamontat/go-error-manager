@@ -27,18 +27,17 @@ var errorManager = New()
 
 // StartNewManageError will return new default ErrManager
 func StartNewManageError() *ErrManager {
-	errorManager = New()
-	return errorManager
+	return New()
 }
 
-// StartManageError will return default ErrManager
-func StartManageError() *ErrManager {
+// GetManageError will return default ErrManager
+func GetManageError() *ErrManager {
 	return errorManager
 }
 
 // UpdateByThrowable is use when you have throwable but you want to add more error
 func UpdateByThrowable(throwable Throwable) *ErrManager {
-	return StartManageError().UpdateByThrowable(throwable)
+	return GetManageError().UpdateByThrowable(throwable)
 }
 
 // ResetError will reset all error in error manager

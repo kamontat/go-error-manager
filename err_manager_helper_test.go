@@ -18,7 +18,7 @@ type Helper struct {
 
 func StartHelper() *Helper {
 	return &Helper{
-		ErrorManager: StartManageError(),
+		ErrorManager: GetManageError(),
 		resultError:  "Error #" + strconv.Itoa(rand.Intn(8)),
 		resultNormal: "Hello world: #" + strconv.Itoa(rand.Intn(8)),
 	}

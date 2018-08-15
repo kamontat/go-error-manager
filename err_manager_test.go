@@ -39,7 +39,7 @@ var ErrorManagerTestFunction = func(helper *Helper) func() {
 		It("manager.ResetError command", func() {
 			helper.StartTestCase()
 
-			manager.StartManageError().
+			manager.GetManageError().
 				ExecuteWith1Parameters(helper.RunWithError()).
 				ExecuteWith1Parameters(helper.RunWithError()).
 				ExecuteWith1Parameters(helper.RunWithError()).

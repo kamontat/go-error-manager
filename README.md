@@ -10,9 +10,9 @@ The bad error handle in golang and cut off exception.
 
 The principle of the code is always continue and chainable. Most of the function are return itself for use other function in chain.
 
-1. The Error manager (`ErrManager`) is **Singleton**, you can get it from
-    1. `StartManageError()` normal singleton getter
-    2. `StartNewManageError()` normal singleton getter with `Reset` errors
+1. The Error manager (`ErrManager`) is for management error and exception in golang. you can use it via
+    1. `GetManageError()` normal singleton getter
+    2. `StartNewManageError()` return absolute new object
     3. `UpdateByThrowable(throwable)` if you have `Throwable` object
     4. `ResetError()` which will return reseted manager.
 2. After that, several method that can chain
