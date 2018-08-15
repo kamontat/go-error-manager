@@ -1,6 +1,7 @@
 package manager_test
 
 import (
+	"bytes"
 	"errors"
 
 	manager "github.com/kamontat/go-error-manager"
@@ -172,12 +173,42 @@ var ErrorTestFunction = func(helper *Helper) func() {
 			Expect(newEM.CountError()).To(BeEquivalentTo(1))
 		})
 
-		It("6) after throw, isThrow must be set", func() {
+		It("6) after throw, error will NOT reset", func() {
 			helper.StartTestCaseWithErrorInErrorManager(5)
 			Expect(helper.ErrorManager.CountError()).Should(BeEquivalentTo(5))
 
 			throw := helper.ErrorManager.Throw()
 			Expect(throw.CanBeThrow()).To(BeTrue())
+
+			// test about replace new error method
+			helper.ErrorManager.ExecuteWith1Parameters(helper.RunWithError())
+
+			Expect(helper.ErrorManager.CountError()).Should(BeEquivalentTo(6))
+		})
+
+		It("6.1) To reset error, must call Reset", func() {
+			helper.StartTestCaseWithErrorInErrorManager(5)
+			Expect(helper.ErrorManager.CountError()).Should(BeEquivalentTo(5))
+
+			throw := helper.ErrorManager.Throw()
+			Expect(throw.CanBeThrow()).To(BeTrue())
+
+			helper.ErrorManager.Reset()
+
+			// test about replace new error method
+			helper.ErrorManager.ExecuteWith1Parameters(helper.RunWithError())
+
+			Expect(helper.ErrorManager.CountError()).Should(BeEquivalentTo(1))
+		})
+
+		It("6.2) To reset error, restart with StartNewManageError", func() {
+			helper.StartTestCaseWithErrorInErrorManager(5)
+			Expect(helper.ErrorManager.CountError()).Should(BeEquivalentTo(5))
+
+			throw := helper.ErrorManager.Throw()
+			Expect(throw.CanBeThrow()).To(BeTrue())
+
+			helper.ErrorManager = manager.StartNewManageError()
 
 			// test about replace new error method
 			helper.ErrorManager.ExecuteWith1Parameters(helper.RunWithError())
@@ -220,6 +251,16 @@ var ErrorTestFunction = func(helper *Helper) func() {
 			Expect(throw.ListErrors()).Should(ContainElement(err1))
 			Expect(throw.ListErrors()).Should(ContainElement(err2))
 			Expect(throw.ListErrors()).Should(ContainElement(err3))
+		})
+
+		It("9) Show error and check the result", func() {
+			helper.StartTestCaseWithErrorInErrorManager(4)
+
+			var buf bytes.Buffer
+
+			helper.ErrorManager.Throw().ShowMessage(&buf)
+
+			Expect(buf.String()).To(BeEquivalentTo(helper.ErrorManager.Throw().GetMessage()))
 		})
 	}
 }

@@ -10,7 +10,6 @@ type ResultObserve func(result interface{}) interface{}
 // ErrManager is for manage error in golang
 type ErrManager struct {
 	isError bool
-	isThrow bool
 	result  interface{}
 	err     []error
 }
@@ -19,13 +18,17 @@ type ErrManager struct {
 func New() *ErrManager {
 	return &ErrManager{
 		isError: false,
-		isThrow: false,
 		err:     []error{},
 		result:  nil,
 	}
 }
 
 var errorManager = New()
+
+// StartNewManageError will return new default ErrManager
+func StartNewManageError() *ErrManager {
+	return errorManager.Reset()
+}
 
 // StartManageError will return default ErrManager
 func StartManageError() *ErrManager {
@@ -113,10 +116,7 @@ func (e *ErrManager) ReplaceNewError(err error) *ErrManager {
 
 // AddNewError will run when have error
 func (e *ErrManager) AddNewError(err error) *ErrManager {
-	if e.isThrow {
-		e.isThrow = false
-		e.ReplaceNewError(err)
-	} else if err != nil {
+	if err != nil {
 		e.SetError()
 		e.err = append(e.err, err)
 	}
@@ -134,16 +134,13 @@ func (e *ErrManager) AddNewErrorMessage(message string) *ErrManager {
 // UpdateByThrowable is use when you have throwable but you want to add more error
 func (e *ErrManager) UpdateByThrowable(throwable Throwable) *ErrManager {
 	e.isError = !throwable.isEmpty
-	e.isThrow = false
 	e.err = throwable.err
 	return e
 }
 
 // Throw will throw error out with default message
 func (e *ErrManager) Throw() *Throwable {
-	e.isThrow = true
 	if e.isError {
-		e.isError = false
 		return createThrowable(e.err, createErrorMessage)
 	}
 	return createEmptyThrowable()
@@ -151,9 +148,7 @@ func (e *ErrManager) Throw() *Throwable {
 
 // ThrowWithMessage will throw error out with custom message
 func (e *ErrManager) ThrowWithMessage(message MessageGenerator) *Throwable {
-	e.isThrow = true
 	if e.isError {
-		e.isError = false
 		return createThrowable(e.err, message)
 	}
 	return createEmptyThrowable()
@@ -163,7 +158,6 @@ func (e *ErrManager) ThrowWithMessage(message MessageGenerator) *Throwable {
 // This also call with you call throw, throwWithMessage
 func (e *ErrManager) Reset() *ErrManager {
 	e.isError = false
-	e.isThrow = false
 	e.err = []error{}
 	e.result = nil
 	return e

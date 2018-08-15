@@ -2,6 +2,7 @@ package manager
 
 import (
 	"fmt"
+	"io"
 	"os"
 )
 
@@ -19,6 +20,15 @@ type Throwable struct {
 // CanBeThrow will return boolean, is throwable can be throw
 func (t *Throwable) CanBeThrow() bool {
 	return !t.isEmpty && len(t.err) > 0
+}
+
+// ShowMessage will show the errors message
+func (t *Throwable) ShowMessage(w io.Writer) *Throwable {
+	if w == nil {
+		w = os.Stdout
+	}
+	fmt.Fprint(w, t.GetMessage())
+	return t
 }
 
 // GetMessage will return error message
