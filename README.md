@@ -6,7 +6,7 @@ Error manager for `gitgo` and `ndd-cli` (go edition)
 
 The bad error handle in golang and cut off exception.
 
-## Usage
+## Usage [![GoDoc](https://godoc.org/github.com/kamontat/go-error-manager?status.svg)](https://godoc.org/github.com/kamontat/go-error-manager)
 
 The principle of the code is always continue and chainable. Most of the function are return itself for use other function in chain.
 
