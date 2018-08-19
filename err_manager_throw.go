@@ -23,11 +23,19 @@ func (t *Throwable) CanBeThrow() bool {
 }
 
 // ShowMessage will show the errors message
-func (t *Throwable) ShowMessage(w io.Writer) *Throwable {
+func (t *Throwable) ShowMessage() *Throwable {
+	return t.CustomShowMessage(nil)
+}
+
+// CustomShowMessage will show the errors message to custom writer
+func (t *Throwable) CustomShowMessage(w io.Writer) *Throwable {
 	if w == nil {
 		w = os.Stdout
 	}
-	fmt.Fprint(w, t.GetMessage())
+
+	if t.CanBeThrow() {
+		fmt.Fprint(w, t.GetMessage())
+	}
 	return t
 }
 
@@ -36,19 +44,30 @@ func (t *Throwable) GetMessage() string {
 	return t.message
 }
 
+// SetCustomMessage will set current message by new message generator
+func (t *Throwable) SetCustomMessage(generator MessageGenerator) *Throwable {
+	t.message = t.GetCustomMessage(generator)
+	return t
+}
+
+// GetCustomMessage will use current errors list to generate custom message
+func (t *Throwable) GetCustomMessage(generator MessageGenerator) string {
+	return generator(t.err)
+}
+
 // ListErrors will return list of error
 func (t *Throwable) ListErrors() []error {
 	return t.err
 }
 
-// Exit :run os.Exit with default code
+// Exit run os.Exit with default code
 func (t *Throwable) Exit() {
 	if t.CanBeThrow() {
 		os.Exit(t.code)
 	}
 }
 
-// ExitWithCode :run os.Exit with custom code
+// ExitWithCode run os.Exit with custom code
 func (t *Throwable) ExitWithCode(code int) {
 	t.code = code
 	t.Exit()

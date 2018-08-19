@@ -1,123 +1,398 @@
 package manager_test
 
 import (
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
+	"errors"
+	"testing"
+
+	"github.com/kamontat/go-error-manager"
+
+	. "github.com/smartystreets/goconvey/convey"
 )
 
-const ResultTestTitle = "Without error"
+func TestResultManager(t *testing.T) {
+	Convey("Given empty result manager", t, func() {
+		resultManager := manager.StartResultManager()
 
-var ResultTestFunction = func(helper *Helper) func() {
-	return func() {
-		It("1) run 'Exec2Parameter' and cannot throw", func() {
-			helper.StartTestCase()
-			Expect(helper.ErrorManager.HaveError()).To(BeFalse())
-			newEM := helper.ErrorManager.ExecuteWith2Parameters(helper.RunResultNoError())
-			Expect(newEM.HaveError()).To(BeFalse())
-			Expect(newEM.CountError()).Should(BeZero())
+		Convey("Try to get the result", func() {
+			So(resultManager.GetResult(), ShouldBeEmpty)
 		})
 
-		It("2) run 'Exec1Parameter' and cannot throw", func() {
-			helper.StartTestCase()
-			Expect(helper.ErrorManager.HaveError()).To(BeFalse())
-			newEM := helper.ErrorManager.ExecuteWith1Parameters(helper.RunNoError())
-			Expect(newEM.HaveError()).To(BeFalse())
-			Expect(newEM.CountError()).Should(BeZero())
+		Convey("Try to get all results", func() {
+			So(resultManager.GetResults(), ShouldHaveLength, 0)
 		})
 
-		It("3.1) next: try to get throwable by GetResult", func() {
-			helper.StartTestCaseWithResult()
-			Expect(helper.ErrorManager.CountError()).Should(BeZero())
-
-			_, throwable := helper.ErrorManager.GetResult()
-			Expect(throwable.CanBeThrow()).Should(BeFalse())
-			// this should not run, if can the test will be fail
-			throwable.Exit()
-
-			helper.SaveErrorManagerState(helper.ErrorManager)
+		Convey("Try to throw the error", func() {
+			throw := resultManager.Throw()
+			Convey("Throwable cannot be throw", func() {
+				So(throw.CanBeThrow(), ShouldBeFalse)
+			})
 		})
 
-		It("3.2) next: try to get result by GetResult", func() {
-			helper.StartTestCaseWithPreviousState()
-			Expect(helper.ErrorManager.CountError()).Should(BeZero())
+		Convey("Execute with zero parameter", func() {
+			Convey("with 1 return", func() {
+				returnError := errors.New("return this error #10")
 
-			result, _ := helper.ErrorManager.GetResult()
-			str, ok := result.(string)
-			Expect(ok).To(BeTrue())
-			Expect(str).ToNot(BeNil())
-			Expect(str).To(BeEquivalentTo(helper.GetResultNormal()))
-		})
+				Convey("The return is error", func() {
+					resultManager.Execute0ParametersA(func() error { return returnError })
 
-		It("4.1) try to get throwable by Throw", func() {
-			helper.StartTestCaseWithResult()
-			Expect(helper.ErrorManager.CountError()).Should(BeZero())
+					Convey("Can throw the error", func() {
+						So(resultManager.Throw().CanBeThrow(), ShouldBeTrue)
+					})
 
-			throwable := helper.ErrorManager.Throw()
-			Expect(throwable.CanBeThrow()).Should(BeFalse())
-			Expect(throwable.GetMessage()).Should(BeEmpty())
-			Expect(throwable.ListErrors()).Should(BeEmpty())
-			// this should not run, if can the test will be fail
-			throwable.Exit()
-		})
+					Convey("IfError will be executed", func() {
+						resultManager.IfError(func(throw *manager.Throwable) {
+							So(throw.CanBeThrow(), ShouldBeTrue)
+							So(throw.ListErrors(), ShouldContain, returnError)
+						})
+					})
 
-		It("4.2) try to get throwable by ThrowMessage", func() {
-			helper.StartTestCaseWithResult()
-			Expect(helper.ErrorManager.CountError()).Should(BeZero())
+					Convey("IfNoError won't be executed", func() {
+						resultManager.IfNoError(func() {
+							So("Should fail", ShouldEqual, "IfNoError shouldn't run")
+						})
 
-			throwable := helper.ErrorManager.ThrowWithMessage(func(errs []error) string {
-				return "Hello world"
+						So(true, ShouldBeTrue)
+					})
+
+					Convey("IfResult won't be executed", func() {
+						resultManager.IfResult(func(res string) {
+							So("Should fail", ShouldEqual, "IfResult shouldn't run")
+						})
+
+						So(true, ShouldBeTrue)
+					})
+
+					Convey("IfNoResult will be executed", func() {
+						resultManager.IfNoResult(func() {
+							So(true, ShouldBeTrue)
+						})
+					})
+				})
+
+				Convey("The return is nil", func() {
+					resultManager.Execute0ParametersA(func() error { return nil })
+
+					Convey("Cannot throw the error", func() {
+						So(resultManager.Throw().CanBeThrow(), ShouldBeFalse)
+					})
+
+					Convey("IfError won't be executed", func() {
+						resultManager.IfError(func(throw *manager.Throwable) {
+							So("Should fail", ShouldEqual, "IfError shouldn't run")
+						})
+
+						So(true, ShouldBeTrue)
+					})
+
+					Convey("IfNoError will be executed", func() {
+						resultManager.IfNoError(func() {
+							So(true, ShouldBeTrue)
+						})
+					})
+
+					Convey("IfResult won't be executed", func() {
+						resultManager.IfResult(func(s string) {
+							So("Should fail", ShouldEqual, "IfResult shouldn't run")
+						})
+
+						So(true, ShouldBeTrue)
+					})
+
+					Convey("IfNoResult will be executed", func() {
+						resultManager.IfNoResult(func() {
+							So(true, ShouldBeTrue)
+						})
+					})
+				})
 			})
 
-			Expect(throwable.GetMessage()).Should(BeEmpty())
-			// this should not run, if can the test will be fail
-			throwable.ExitWithCode(4)
+			Convey("with 2 return", func() {
+				returnString := "Hello world"
+				returnError := errors.New("return error #20")
+
+				Convey("The return is string and error", func() {
+					resultManager.Execute0ParametersB(func() (string, error) { return returnString, returnError })
+
+					Convey("Can be throw the error", func() {
+						So(resultManager.Throw().CanBeThrow(), ShouldBeTrue)
+					})
+
+					Convey("IfError will be executed", func() {
+						resultManager.IfError(func(throw *manager.Throwable) {
+							So(throw.CanBeThrow(), ShouldBeTrue)
+							So(throw.ListErrors(), ShouldContain, returnError)
+						})
+					})
+
+					Convey("IfNoError won't be executed", func() {
+						resultManager.IfNoError(func() {
+							So("Should fail", ShouldEqual, "IfNoError shouldn't run")
+						})
+
+						So(true, ShouldBeTrue)
+					})
+
+					Convey("IfResult won't be executed", func() {
+						resultManager.IfResult(func(s string) {
+							So("Should fail", ShouldEqual, "IfResult shouldn't run")
+						})
+
+						So(true, ShouldBeTrue)
+					})
+
+					Convey("IfNoResult will be executed", func() {
+						resultManager.IfNoResult(func() {
+							So(true, ShouldBeTrue)
+						})
+					})
+				})
+
+				Convey("The return is string only", func() {
+					resultManager.Execute0ParametersB(func() (string, error) { return returnString, nil })
+
+					Convey("Cannot throw the error", func() {
+
+					})
+
+					Convey("IfError won't be executed", func() {
+						resultManager.IfError(func(throw *manager.Throwable) {
+							So("Should fail", ShouldEqual, "IfError shouldn't run")
+						})
+
+						So(true, ShouldBeTrue)
+					})
+
+					Convey("IfNoError will be executed", func() {
+						resultManager.IfNoError(func() {
+							So(true, ShouldBeTrue)
+						})
+					})
+
+					Convey("IfResult will be executed", func() {
+						resultManager.IfResult(func(s string) {
+							So(s, ShouldEqual, returnString)
+						})
+					})
+
+					Convey("IfNoResult won't be executed", func() {
+						resultManager.IfNoResult(func() {
+							So("Should fail", ShouldEqual, "IfError shouldn't run")
+						})
+
+						So(true, ShouldBeTrue)
+					})
+				})
+			})
 		})
 
-		It("5.1) Mapping result", func() {
-			helper.StartTestCaseWithResult()
-			result := helper.ErrorManager.MapResult(func(res interface{}) interface{} {
-				str, _ := res.(string)
-				return str + " 123"
+		Convey("Execute with zero parameter (short form)", func() {
+			Convey("with 1 return", func() {
+				Convey("The return is error", func() {
+					resultManager.Exec01(func() error { return errors.New("error") })
+					Convey("Can throw the error", func() {
+						So(resultManager.Throw().CanBeThrow(), ShouldBeTrue)
+					})
+				})
+
+				Convey("The return is nil", func() {
+					resultManager.Exec01(func() error { return nil })
+					Convey("Cannot throw the error", func() {
+						So(resultManager.Throw().CanBeThrow(), ShouldBeFalse)
+					})
+				})
 			})
 
-			Expect(result).Should(BeEquivalentTo(helper.GetResultNormal() + " 123"))
+			Convey("with 2 return", func() {
+				Convey("The return is string and error", func() {
+					resultManager.Exec02(func() (string, error) { return "Hello", errors.New("error") })
+					Convey("Can throw the error", func() {
+						So(resultManager.Throw().CanBeThrow(), ShouldBeTrue)
+					})
+				})
+
+				Convey("The return is string only", func() {
+					resultManager.Exec02(func() (string, error) { return "Hello", nil })
+					Convey("Cannot throw the error", func() {
+						So(resultManager.Throw().CanBeThrow(), ShouldBeFalse)
+					})
+				})
+			})
 		})
 
-		It("5.2) Mapping result to error manager", func() {
-			helper.StartTestCaseWithResult()
-			helper.ErrorManager.MapAndChangeResult(func(res interface{}) interface{} {
-				str, _ := res.(string)
-				return str + " 123"
+		Convey("Execute with 1 parameter", func() {
+			Convey("with 1 return", func() {
+				returnError := errors.New("this is 11 error #011")
+
+				Convey("The return is error", func() {
+					resultManager.Execute1ParametersA(func(s string) error {
+						// Hello must pass though input function
+						So(s, ShouldEqual, "Hello")
+
+						return returnError
+					}, "Hello")
+
+					Convey("Can throw the error", func() {
+						So(resultManager.Throw().CanBeThrow(), ShouldBeTrue)
+					})
+				})
+
+				Convey("The return is nil", func() {
+					resultManager.Execute1ParametersA(func(s string) error { return nil }, "Hello")
+
+					Convey("Cannot throw the error", func() {
+						So(resultManager.Throw().CanBeThrow(), ShouldBeFalse)
+					})
+				})
 			})
 
-			Expect(helper.ErrorManager.GetResultOnly()).Should(BeEquivalentTo(helper.GetResultNormal() + " 123"))
+			Convey("with 2 return", func() {
+				returnString := "This is 12 string #012"
+				returnError := errors.New("this is 12 error #012")
+
+				Convey("The return is string and error", func() {
+					resultManager.Execute1ParametersB(func(s string) (string, error) {
+						// Hello must pass though input function
+						So(s, ShouldEqual, "Hello")
+
+						return returnString, returnError
+					}, "Hello")
+
+					Convey("Can throw the error", func() {
+						So(resultManager.Throw().CanBeThrow(), ShouldBeTrue)
+					})
+				})
+
+				Convey("The return is string only", func() {
+					resultManager.Execute1ParametersB(func(s string) (string, error) { return returnString, nil }, "World")
+
+					Convey("Cannot throw the error", func() {
+						So(resultManager.Throw().CanBeThrow(), ShouldBeFalse)
+					})
+				})
+			})
 		})
 
-		It("6.1) run add with no error", func() {
-			helper.StartTestCase()
-			helper.ErrorManager.AddNewError(nil)
-			Expect(helper.ErrorManager.HaveError()).Should(BeFalse())
-			throw := helper.ErrorManager.Throw()
-			Expect(throw.CanBeThrow()).Should(BeFalse())
-			Expect(throw.ListErrors()).Should(HaveLen(0))
+		Convey("Execute with 1 parameter (short form)", func() {
+			Convey("with 1 return", func() {
+				Convey("The return is error", func() {
+					resultManager.Exec11(func(s string) error { return errors.New("error") }, "String#1231")
+					Convey("Can throw the error", func() {
+						So(resultManager.Throw().CanBeThrow(), ShouldBeTrue)
+					})
+				})
+
+				Convey("The return is nil", func() {
+					resultManager.Exec11(func(s string) error { return nil }, "String#1232")
+					Convey("Cannot throw the error", func() {
+						So(resultManager.Throw().CanBeThrow(), ShouldBeFalse)
+					})
+				})
+			})
+
+			Convey("with 2 return", func() {
+				Convey("The return is string and error", func() {
+					resultManager.Exec12(func(s string) (string, error) { return "Hello", errors.New("error") }, "String#1233")
+					Convey("Can throw the error", func() {
+						So(resultManager.Throw().CanBeThrow(), ShouldBeTrue)
+					})
+				})
+
+				Convey("The return is string only", func() {
+					resultManager.Exec12(func(s string) (string, error) { return "Hello", nil }, "String#1234")
+					Convey("Cannot throw the error", func() {
+						So(resultManager.Throw().CanBeThrow(), ShouldBeFalse)
+					})
+				})
+			})
 		})
 
-		It("6.2) run add with no error message", func() {
-			helper.StartTestCase()
-			helper.ErrorManager.AddNewErrorMessage("")
-			Expect(helper.ErrorManager.HaveError()).Should(BeFalse())
-			throw := helper.ErrorManager.Throw()
-			Expect(throw.CanBeThrow()).Should(BeFalse())
-			Expect(throw.ListErrors()).Should(HaveLen(0))
-		})
+		Convey("Save the result and error", func() {
+			Convey("With result only", func() {
+				resultManager.Save("Result #4567", nil)
 
-		It("6.3) run replace with no error", func() {
-			helper.StartTestCase()
-			helper.ErrorManager.ReplaceNewError(nil)
-			Expect(helper.ErrorManager.HaveError()).Should(BeFalse())
-			throw := helper.ErrorManager.Throw()
-			Expect(throw.CanBeThrow()).Should(BeFalse())
-			Expect(throw.ListErrors()).Should(HaveLen(0))
+				Convey("Shouldn't throw", func() {
+					So(resultManager.Throw().CanBeThrow(), ShouldBeFalse)
+				})
+
+				Convey("When get result", func() {
+					result := resultManager.GetResult()
+					Convey("Should exist and same as input result", func() {
+						So(result, ShouldEqual, "Result #4567")
+					})
+				})
+			})
+
+			Convey("With error only", func() {
+				resultManager.Save("", errors.New("template error #8563"))
+				Convey("Should throwable", func() {
+					So(resultManager.Throw().CanBeThrow(), ShouldBeTrue)
+				})
+
+				Convey("When get result", func() {
+					result := resultManager.GetResult()
+					Convey("Should be empty", func() {
+						So(result, ShouldBeEmpty)
+					})
+				})
+			})
+
+			Convey("With result and error", func() {
+				resultManager.Save("This exist", errors.New("template error #8563"))
+				Convey("Should throwable", func() {
+					So(resultManager.Throw().CanBeThrow(), ShouldBeTrue)
+				})
+
+				Convey("When get result", func() {
+					result := resultManager.GetResult()
+					Convey("Should be empty", func() {
+						So(result, ShouldBeEmpty)
+					})
+				})
+			})
 		})
-	}
+		Convey("Add result", func() {
+			resultA := "new result #00001"
+			resultManager.Save(resultA, nil)
+			Convey("The result should exist", func() {
+				So(resultManager.GetResults(), ShouldContain, resultA)
+				So(resultManager.GetResults(), ShouldHaveLength, 1)
+			})
+
+			Convey("Add more result", func() {
+				resultB := "new result #00002"
+				resultManager.Save(resultB, nil)
+				Convey("The result should more than 1", func() {
+					So(resultManager.GetResults(), ShouldHaveLength, 2)
+				})
+
+				Convey("Callback with all result should return all result", func() {
+					resultManager.IfAllResult(func(results []string) {
+						So(results, ShouldHaveLength, 2)
+						So(results, ShouldResemble, resultManager.GetResults())
+						So(results, ShouldContain, resultA)
+						So(results, ShouldContain, resultB)
+					})
+				})
+
+				Convey("When clear result", func() {
+					oldResults := resultManager.ClearResults()
+
+					Convey("Result manager should create new empty results", func() {
+						So(oldResults, ShouldNotResemble, resultManager.GetResults())
+					})
+
+					Convey("Result manager should contain empty results", func() {
+						So(resultManager.GetResults(), ShouldBeEmpty)
+						So(resultManager.GetResults(), ShouldHaveLength, 0)
+					})
+
+					Convey("Old result should contain previous results list", func() {
+						So(oldResults, ShouldHaveLength, 2)
+						So(oldResults, ShouldContain, resultA)
+						So(oldResults, ShouldContain, resultB)
+					})
+				})
+			})
+		})
+	})
 }

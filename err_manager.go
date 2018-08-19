@@ -4,97 +4,22 @@ import (
 	"errors"
 )
 
-// ResultObserve is function receive result and modify it, then return
-type ResultObserve func(result interface{}) interface{}
-
 // ErrManager is for manage error in golang
 type ErrManager struct {
 	isError bool
-	result  interface{}
 	err     []error
 }
 
-// New is for create new error manager
-func New() *ErrManager {
+func newErrorManager() *ErrManager {
 	return &ErrManager{
 		isError: false,
 		err:     []error{},
-		result:  nil,
 	}
 }
-
-var errorManager = New()
 
 // StartNewManageError will return new default ErrManager
 func StartNewManageError() *ErrManager {
-	return New()
-}
-
-// GetManageError will return default ErrManager
-func GetManageError() *ErrManager {
-	return errorManager
-}
-
-// UpdateByThrowable is use when you have throwable but you want to add more error
-func UpdateByThrowable(throwable Throwable) *ErrManager {
-	return GetManageError().UpdateByThrowable(throwable)
-}
-
-// ResetError will reset all error in error manager
-func ResetError() *ErrManager {
-	return errorManager.Reset()
-}
-
-// E1P is short name of ExecuteWith1Parameters
-func (e *ErrManager) E1P(err error) *ErrManager {
-	return e.ExecuteWith1Parameters(err)
-}
-
-// ExecuteWith1Parameters is method that call with function that return 1 parameter
-func (e *ErrManager) ExecuteWith1Parameters(err error) *ErrManager {
-	e.AddNewError(err)
-	return e
-}
-
-// E2P is short name of ExecuteWith2Parameters
-func (e *ErrManager) E2P(result interface{}, err error) *ErrManager {
-	return e.ExecuteWith2Parameters(result, err)
-}
-
-// ExecuteWith2Parameters is method that call with function that return 2 parameters
-func (e *ErrManager) ExecuteWith2Parameters(result interface{}, err error) *ErrManager {
-	e.result = result
-	return e.AddNewError(err)
-}
-
-// GetResult will return the result if exist and throwable
-func (e *ErrManager) GetResult() (interface{}, *Throwable) {
-	if !e.isError {
-		return e.result, e.Throw()
-	}
-	return nil, e.Throw()
-}
-
-// GetResultOnly will return the result if exist, otherwise return null
-func (e *ErrManager) GetResultOnly() interface{} {
-	if !e.isError {
-		return e.result
-	}
-	return nil
-}
-
-// MapResult is update exist result and return
-func (e *ErrManager) MapResult(observe ResultObserve) interface{} {
-	if !e.isError {
-		return observe(e.result)
-	}
-	return nil
-}
-
-// MapAndChangeResult is update exist result and save in to Error manager
-func (e *ErrManager) MapAndChangeResult(observe ResultObserve) *ErrManager {
-	e.result = e.MapResult(observe)
-	return e
+	return newErrorManager()
 }
 
 // SetError is tell the object that error exist. this will run when you add new error too
@@ -118,8 +43,6 @@ func (e *ErrManager) ReplaceNewError(err error) *ErrManager {
 	if err != nil {
 		e.SetError()
 		e.err = []error{err}
-	} else {
-		e.err = []error{}
 	}
 	return e
 }
@@ -142,7 +65,7 @@ func (e *ErrManager) AddNewErrorMessage(message string) *ErrManager {
 }
 
 // UpdateByThrowable is use when you have throwable but you want to add more error
-func (e *ErrManager) UpdateByThrowable(throwable Throwable) *ErrManager {
+func (e *ErrManager) UpdateByThrowable(throwable *Throwable) *ErrManager {
 	e.isError = !throwable.isEmpty
 	e.err = throwable.err
 	return e
@@ -169,6 +92,5 @@ func (e *ErrManager) ThrowWithMessage(message MessageGenerator) *Throwable {
 func (e *ErrManager) Reset() *ErrManager {
 	e.isError = false
 	e.err = []error{}
-	e.result = nil
 	return e
 }
