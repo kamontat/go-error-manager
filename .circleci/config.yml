@@ -6,6 +6,17 @@ jobs:
     working_directory: /go/src/github.com/kamontat/go-error-manager
     steps:
       - checkout
+      - run: mkdir -p "/tmp/test-results/error-manager"
+      - restore_cache:
+          keys:
+            - v1-pkg-cache
       - run: go get -v -t -d ./...
-      - run: go test -cover -coverprofile=coverage.txt -covermode=atomic
+      - run: go get -u github.com/NeroINC/goconvey-junit-report
+      - save_cache:
+          key: v1-pkg-cache
+          paths:
+            - /go/pkg
+      - run: go test -cover -coverprofile=coverage.txt -covermode=atomic -v
       - run: 'bash <(curl -s https://codecov.io/bash)'
+      - store_test_results:
+          path: /tmp/test-results

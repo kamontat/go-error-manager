@@ -19,11 +19,11 @@ func TestThrowable(t *testing.T) {
 	Convey("Given empty Throwable", t, func() {
 		throw := manager.StartNewManageError().Throw()
 
-		Convey("Cannot throw", func() {
+		Convey("Then cannot throw", func() {
 			So(throw.CanBeThrow(), ShouldBeFalse)
 		})
 
-		Convey("Cannot get any error message", func() {
+		Convey("And cannot get any error message", func() {
 			So(throw.GetMessage(), ShouldBeEmpty)
 		})
 	})
@@ -38,57 +38,61 @@ func TestThrowable(t *testing.T) {
 			AddNewError(addError).
 			Throw()
 
-		Convey("Should be throw", func() {
+		Convey("Then throwable", func() {
 			So(throw.CanBeThrow(), ShouldBeTrue)
 		})
 
-		Convey("Have error message", func() {
+		Convey("And have error message", func() {
 			So(throw.GetMessage(), ShouldContainSubstring, "number1")
 			So(throw.GetMessage(), ShouldContainSubstring, "number2")
 			So(throw.GetMessage(), ShouldContainSubstring, "number3")
 			So(throw.GetMessage(), ShouldContainSubstring, "number4")
 		})
 
-		Convey("set Custom error message", func() {
+		Convey("When set custom error message", func() {
 			newThrow := throw.SetCustomMessage(func(err []error) string {
 				return "Custom error message"
 			})
-			Convey("Show the error as expected", func() {
+
+			Convey("Then show the error as custom message", func() {
 				So(newThrow.GetMessage(), ShouldEqual, "Custom error message")
 			})
 
-			Convey("Get error message via custom", func() {
+			Convey("And can get the error message via GetCustomMessage", func() {
 				message := throw.GetCustomMessage(func(err []error) string {
 					return "get error"
 				})
+
 				So(message, ShouldEqual, "get error")
 			})
 		})
 
-		Convey("Show the message via io.Writer", func() {
+		Convey("When show the message via io.Writer", func() {
 			var buf bytes.Buffer
 			throw.CustomShowMessage(&buf)
 
-			So(buf.String(), ShouldContainSubstring, "number1")
-			So(buf.String(), ShouldContainSubstring, "number2")
-			So(buf.String(), ShouldContainSubstring, "number3")
-			So(buf.String(), ShouldContainSubstring, "number4")
+			Convey("Then the writer should contain error results", func() {
+				So(buf.String(), ShouldContainSubstring, "number1")
+				So(buf.String(), ShouldContainSubstring, "number2")
+				So(buf.String(), ShouldContainSubstring, "number3")
+				So(buf.String(), ShouldContainSubstring, "number4")
+			})
 		})
 
-		Convey("Show the message via Stdout", func() {
+		Convey("When show the message via Stdout", func() {
 			var run = false
 			p := monkey.Patch(fmt.Fprint, func(w io.Writer, a ...interface{}) (n int, err error) {
 				run = true
 				return 0, nil
 			})
 
-			Convey("Use custom show message with nil value", func() {
+			Convey("Then CustomShowMessage should output to stdout", func() {
 				throw.CustomShowMessage(nil)
 
 				So(run, ShouldBeTrue)
 			})
 
-			Convey("Use show message", func() {
+			Convey("And ShowMessage should output to stdout same", func() {
 				throw.ShowMessage()
 
 				So(run, ShouldBeTrue)
@@ -97,39 +101,34 @@ func TestThrowable(t *testing.T) {
 			p.Unpatch()
 		})
 
-		Convey("List the errors", func() {
+		Convey("When get list the errors in throwable", func() {
 			errors := throw.ListErrors()
 
-			Convey("Check is error saved", func() {
+			Convey("Then errors list should be exported", func() {
 				So(errors, ShouldNotBeEmpty)
 				So(errors, ShouldContain, addError)
 			})
 		})
 
-		Convey("Should exit the program", func() {
+		Convey("When exit the program via Exit method", func() {
 			var run = false
 			p := monkey.Patch(os.Exit, func(n int) {
 				if n == 1 {
 					run = true
-				}
-			})
-
-			throw.Exit()
-			So(run, ShouldBeTrue)
-
-			p.Unpatch()
-		})
-
-		Convey("Should exit with custom code", func() {
-			var run = false
-			p := monkey.Patch(os.Exit, func(n int) {
-				if n == 123 {
+				} else if n == 123 {
 					run = true
 				}
 			})
 
-			throw.ExitWithCode(123)
-			So(run, ShouldBeTrue)
+			Convey("Then os.Exit should be run with default error code", func() {
+				throw.Exit()
+				So(run, ShouldBeTrue)
+			})
+
+			Convey("Then os.Exit should be run with custom error code", func() {
+				throw.ExitWithCode(123)
+				So(run, ShouldBeTrue)
+			})
 
 			p.Unpatch()
 		})

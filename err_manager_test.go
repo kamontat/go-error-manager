@@ -13,159 +13,171 @@ func TestErrorManager(t *testing.T) {
 	Convey("Given Error manager", t, func() {
 		errorManager := manager.StartNewManageError()
 
-		Convey("Should set every as No Error", func() {
-			So(errorManager.HaveError(), ShouldBeFalse)
-			So(errorManager.CountError(), ShouldBeZeroValue)
+		Convey("When creating, is empty manager", func() {
+			Convey("Then error should not exist", func() {
+				So(errorManager.HaveError(), ShouldBeFalse)
+				So(errorManager.CountError(), ShouldBeZeroValue)
+			})
 		})
 
-		Convey("Try to set as error", func() {
+		Convey("When set as error", func() {
 			errorManager.SetError()
-			Convey("Check is error must exist", func() {
+			Convey("Then the error must exist", func() {
 				So(errorManager.HaveError(), ShouldBeTrue)
 				So(errorManager.CountError(), ShouldBeZeroValue)
 			})
 		})
 
-		Convey("Try to add new error", func() {
+		Convey("When add new error", func() {
 			errorManager.AddNewError(errors.New("This is new error #1"))
 
-			Convey("Check is error must exist", func() {
+			Convey("Then a error must be exist", func() {
 				So(errorManager.HaveError(), ShouldBeTrue)
 			})
 
-			Convey("Count the error must appear", func() {
+			Convey("And counting must greater than 0", func() {
 				So(errorManager.CountError(), ShouldBeGreaterThan, 0)
-			})
-
-			Convey("Add more error", func() {
-				errorManager.AddNewError(errors.New("This is new error #2"))
-
-				Convey("Count again", func() {
-					So(errorManager.CountError(), ShouldEqual, 2)
-				})
-
-				Convey("Throw the error", func() {
-					throw := errorManager.Throw()
-
-					Convey("Throwable mark as error exist", func() {
-						So(throw.CanBeThrow(), ShouldBeTrue)
-					})
-
-					Convey("Can get the result", func() {
-						So(throw.GetMessage(), ShouldContainSubstring, "#1")
-						So(throw.GetMessage(), ShouldContainSubstring, "#2")
-					})
-
-					Convey("Reset the error manager", func() {
-						errorManager.Reset()
-
-						So(errorManager.CountError(), ShouldEqual, 0)
-
-						Convey("And the can reverse the throwable to Error manager", func() {
-							newErrorManager := errorManager.UpdateByThrowable(throw)
-
-							So(newErrorManager.CountError(), ShouldEqual, 2)
-						})
-					})
-				})
-
-				Convey("Throw the error with message", func() {
-					throw := errorManager.ThrowWithMessage(func(err []error) string {
-						return "Hello world"
-					})
-
-					Convey("Throwable mark as error exist", func() {
-						So(throw.CanBeThrow(), ShouldBeTrue)
-					})
-
-					Convey("Can get the result", func() {
-						So(throw.GetMessage(), ShouldEqual, "Hello world")
-					})
-				})
-
-				Convey("After replace error", func() {
-					errorManager.ReplaceNewError(errors.New("This is replace error #11"))
-
-					Convey("The errors list should reset", func() {
-						So(errorManager.HaveError(), ShouldBeTrue)
-						So(errorManager.CountError(), ShouldEqual, 1)
-					})
-				})
-
-				Convey("After replace by nil", func() {
-					errorManager.ReplaceNewError(nil)
-					Convey("The errors list should be the same", func() {
-						So(errorManager.HaveError(), ShouldBeTrue)
-						So(errorManager.CountError(), ShouldEqual, 2)
-					})
-				})
-
-				Convey("Call Reset method", func() {
-					errorManager.Reset()
-
-					Convey("The error must empty", func() {
-						So(errorManager.HaveError(), ShouldBeFalse)
-						So(errorManager.CountError(), ShouldEqual, 0)
-					})
-				})
 			})
 		})
 
-		Convey("Try to add nil as error", func() {
+		Convey("When add multiple errors", func() {
+			errorManager.AddNewError(errors.New("This is new error #1"))
+			errorManager.AddNewError(errors.New("This is new error #2"))
+
+			Convey("Then counting should be 2", func() {
+				So(errorManager.CountError(), ShouldEqual, 2)
+			})
+		})
+
+		Convey("When add nil as error", func() {
 			errorManager.AddNewError(nil)
 
-			Convey("The checker should return as false", func() {
+			Convey("Then error checker should return false", func() {
 				So(errorManager.HaveError(), ShouldBeFalse)
 			})
 		})
 
-		Convey("Try to add more error by string message", func() {
+		Convey("When add error by error message", func() {
 			errorManager.AddNewErrorMessage("This is error")
 
-			Convey("The checker should return as true", func() {
+			Convey("Then error should exist", func() {
 				So(errorManager.HaveError(), ShouldBeTrue)
 			})
 
-			Convey("and errors list must be append", func() {
+			Convey("And errors list must be append", func() {
 				So(errorManager.CountError(), ShouldEqual, 1)
 			})
 		})
 
-		Convey("Try to add more error with empty string", func() {
+		Convey("When add error with empty string", func() {
 			errorManager.AddNewErrorMessage("")
 
-			Convey("The checker should return as true", func() {
+			Convey("Then error checker should return false", func() {
 				So(errorManager.HaveError(), ShouldBeFalse)
 			})
 
-			Convey("and errors list must be append", func() {
+			Convey("And errors list should be empty", func() {
 				So(errorManager.CountError(), ShouldEqual, 0)
 			})
 		})
 
-		Convey("Throw with empty errors", func() {
+		Convey("When throw error with empty errors", func() {
 			throw := errorManager.Throw()
 
-			Convey("Throwable should mark as no error", func() {
+			Convey("Then throwable should mark as no error", func() {
 				So(throw.CanBeThrow(), ShouldBeFalse)
 			})
 
-			Convey("Can get empty error message", func() {
+			Convey("And cannot get error message", func() {
 				So(throw.GetMessage(), ShouldBeEmpty)
 			})
 		})
 
-		Convey("Throw with custom message but empty errors", func() {
+		Convey("When throw empty error with custom message", func() {
 			throw := errorManager.ThrowWithMessage(func(err []error) string {
 				return "Hello world"
 			})
 
-			Convey("Throwable should mark as no error", func() {
+			Convey("Then throwable should mark as no error", func() {
 				So(throw.CanBeThrow(), ShouldBeFalse)
 			})
 
-			Convey("Can get empty error message", func() {
+			Convey("And cannot get any error message", func() {
 				So(throw.GetMessage(), ShouldBeEmpty)
+			})
+		})
+	})
+
+	Convey("Given error manager with errors", t, func() {
+		errorManager := manager.StartNewManageError()
+		errorManager.AddNewError(errors.New("This is new error #1"))
+		errorManager.AddNewError(errors.New("This is new error #2"))
+
+		Convey("When throw the error", func() {
+			throw := errorManager.Throw()
+
+			Convey("Then throwable should mark as error", func() {
+				So(throw.CanBeThrow(), ShouldBeTrue)
+			})
+
+			Convey("And can get the error message", func() {
+				So(throw.GetMessage(), ShouldContainSubstring, "#1")
+				So(throw.GetMessage(), ShouldContainSubstring, "#2")
+			})
+
+			Convey("And it can reverse the throwable to Error manager", func() {
+				newErrorManager := errorManager.UpdateByThrowable(throw)
+
+				So(newErrorManager.CountError(), ShouldEqual, 2)
+			})
+		})
+
+		Convey("When throw the error with message", func() {
+			throw := errorManager.ThrowWithMessage(func(err []error) string {
+				return "Hello world"
+			})
+
+			Convey("Then throwable should mark as error", func() {
+				So(throw.CanBeThrow(), ShouldBeTrue)
+			})
+
+			Convey("And can get the result as custom message", func() {
+				So(throw.GetMessage(), ShouldEqual, "Hello world")
+			})
+		})
+
+		Convey("When reset the error manager", func() {
+			errorManager.Reset()
+
+			Convey("Then error list should be empty", func() {
+				So(errorManager.CountError(), ShouldEqual, 0)
+			})
+		})
+
+		Convey("When replace error", func() {
+			errorManager.ReplaceNewError(errors.New("This is replace error #11"))
+
+			Convey("Then errors list should reset", func() {
+				So(errorManager.HaveError(), ShouldBeTrue)
+				So(errorManager.CountError(), ShouldEqual, 1)
+			})
+		})
+
+		Convey("When replace error by nil", func() {
+			errorManager.ReplaceNewError(nil)
+
+			Convey("Then errors list should be the same", func() {
+				So(errorManager.HaveError(), ShouldBeTrue)
+				So(errorManager.CountError(), ShouldEqual, 2)
+			})
+		})
+
+		Convey("When call Reset method", func() {
+			errorManager.Reset()
+
+			Convey("Then errors list must empty", func() {
+				So(errorManager.HaveError(), ShouldBeFalse)
+				So(errorManager.CountError(), ShouldEqual, 0)
 			})
 		})
 	})
