@@ -18,10 +18,11 @@ func WrapNil() *ResultWrapper {
 }
 
 // Unwrap will call the input function if and only if result is not null
-func (r *ResultWrapper) Unwrap(f func(interface{})) {
+func (r *ResultWrapper) Unwrap(f func(interface{})) *ResultWrapper {
 	if r.Exist() {
 		f(r.result)
 	}
+	return r
 }
 
 // UnwrapNext will call the input function and wrap again with the result of function
