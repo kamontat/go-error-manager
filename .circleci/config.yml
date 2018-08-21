@@ -16,7 +16,9 @@ jobs:
           key: v1-pkg-cache
           paths:
             - /go/pkg
-      - run: go test -cover -coverprofile=coverage.txt -covermode=atomic -v
+      - run: >-
+          go test -gcflags=-l -cover -coverprofile=coverage.txt
+          -covermode=atomic -v
       - run: 'bash <(curl -s https://codecov.io/bash)'
       - store_test_results:
           path: /tmp/test-results
