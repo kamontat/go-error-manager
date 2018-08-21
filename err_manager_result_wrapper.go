@@ -27,6 +27,24 @@ func (r *ResultWrapper) UnwrapNext(f func(interface{}) interface{}) *ResultWrapp
 	return Wrap(nil)
 }
 
+// Catch will catch if result not exist.
+// Pass 2 parameters; first is the function when result was nil and return error.
+// second is how program should react with error, pass nil to Throw the exception.
+func (r *ResultWrapper) Catch(f func() error, exception func(t *Throwable)) *Throwable {
+	if r.Exist() {
+		return createEmptyThrowable()
+	}
+
+	e := f()
+	t := StartNewManageError().Add(e).Throw()
+
+	if exception != nil && t.CanBeThrow() {
+		exception(t)
+	}
+
+	return t
+}
+
 // NotExist is checker of check is result == nil
 func (r *ResultWrapper) NotExist() bool {
 	return r.result == nil

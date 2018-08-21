@@ -83,6 +83,10 @@ func createErrorMessage(errs []error) string {
 }
 
 func createThrowable(errs []error, message MessageGenerator) *Throwable {
+	if message == nil {
+		message = createErrorMessage
+	}
+
 	return &Throwable{
 		isEmpty: false,
 		err:     errs,

@@ -1,6 +1,7 @@
 package manager_test
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/kamontat/go-error-manager"
@@ -13,7 +14,7 @@ func TestResultWrapper(t *testing.T) {
 		resultWrapper := manager.Wrap(nil)
 
 		Convey("When check the result", func() {
-			Convey("Then result should be exist", func() {
+			Convey("Then result should not exist", func() {
 				So(resultWrapper.Exist(), ShouldBeFalse)
 				So(resultWrapper.NotExist(), ShouldBeTrue)
 			})
@@ -23,6 +24,55 @@ func TestResultWrapper(t *testing.T) {
 			Convey("Then call function, it won't run", func() {
 				resultWrapper.Unwrap(func(i interface{}) {
 					So("fail now", ShouldEqual, "this should no run")
+				})
+			})
+		})
+
+		Convey("When catch", func() {
+			err1 := errors.New("error #9123")
+
+			Convey("Then run catch that return error with exception", func() {
+				t := resultWrapper.Catch(func() error {
+					return err1
+				}, func(t *manager.Throwable) {
+					So(t.ListErrors(), ShouldContain, err1)
+				})
+
+				Convey("Then return throwable should be the same as input in exception function", func() {
+					So(t.ListErrors(), ShouldContain, err1)
+				})
+			})
+
+			Convey("Then run catch that return nil with exception", func() {
+				t := resultWrapper.Catch(func() error {
+					return nil
+				}, func(t *manager.Throwable) {
+					So("fail now", ShouldEqual, "This shouldn'y run since error was nil")
+				})
+
+				Convey("And return throwable must be empty", func() {
+					So(t.CanBeThrow(), ShouldBeFalse)
+				})
+			})
+
+			Convey("Then run catch that return error with nil exception", func() {
+				t := resultWrapper.Catch(func() error {
+					return err1
+				}, nil)
+
+				Convey("And return throwable error throwable", func() {
+					So(t.CanBeThrow(), ShouldBeTrue)
+					So(t.GetMessage(), ShouldContainSubstring, err1.Error())
+				})
+			})
+
+			Convey("Then run catch that return nil error with nil exception", func() {
+				t := resultWrapper.Catch(func() error {
+					return nil
+				}, nil)
+
+				Convey("And return throwable must be empty", func() {
+					So(t.CanBeThrow(), ShouldBeFalse)
 				})
 			})
 		})
@@ -41,6 +91,12 @@ func TestResultWrapper(t *testing.T) {
 				resultWrapper.Unwrap(func(i interface{}) {
 					So(i, ShouldEqual, "Hello world")
 				})
+			})
+
+			Convey("Then call Catch exception, it won't run", func() {
+				resultWrapper.Catch(func() error {
+					return errors.New("Hello")
+				}, nil)
 			})
 		})
 

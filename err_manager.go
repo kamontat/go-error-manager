@@ -89,7 +89,7 @@ func (e *ErrManager) UpdateByThrowable(throwable *Throwable) *ErrManager {
 // Throw will throw error out with default message
 func (e *ErrManager) Throw() *Throwable {
 	if e.isError {
-		return createThrowable(e.err, createErrorMessage)
+		return createThrowable(e.err, nil)
 	}
 	return createEmptyThrowable()
 }
