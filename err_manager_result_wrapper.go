@@ -12,6 +12,11 @@ func Wrap(i interface{}) *ResultWrapper {
 	}
 }
 
+// WrapNil will call result wrapper with nil value
+func WrapNil() *ResultWrapper {
+	return Wrap(nil)
+}
+
 // Unwrap will call the input function if and only if result is not null
 func (r *ResultWrapper) Unwrap(f func(interface{})) {
 	if r.Exist() {

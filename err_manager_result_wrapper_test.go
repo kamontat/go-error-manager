@@ -11,7 +11,7 @@ import (
 
 func TestResultWrapper(t *testing.T) {
 	Convey("Given wrapper with nil value", t, func() {
-		resultWrapper := manager.Wrap(nil)
+		resultWrapper := manager.WrapNil()
 
 		Convey("When check the result", func() {
 			Convey("Then result should not exist", func() {
