@@ -70,6 +70,16 @@ func (r *ResultManager) Save(result string, err error) *ResultManager {
 	return r.addError(err).addResult(result)
 }
 
+// HaveError will return true if error manager have contain error
+func (r *ResultManager) HaveError() bool {
+	return r.errorManager.HaveError()
+}
+
+// NoError will return true if error manager don't have any error
+func (r *ResultManager) NoError() bool {
+	return !r.errorManager.HaveError()
+}
+
 // ClearResults will remove all result in this manager
 func (r *ResultManager) ClearResults() []string {
 	res := r.results
@@ -103,6 +113,15 @@ func (r *ResultManager) IfNoError(f func()) *ResultManager {
 	return r
 }
 
+// IfNoErrorThen the function will execute if error manager have empty error.
+// and return the result of function
+func (r *ResultManager) IfNoErrorThen(f func() interface{}) *ResultWrapper {
+	if !r.errorManager.HaveError() {
+		return Wrap(f())
+	}
+	return Wrap(nil)
+}
+
 // IfError the function will execute if error manager contain errors
 func (r *ResultManager) IfError(f func(throwable *Throwable)) *ResultManager {
 	if r.errorManager.HaveError() {
@@ -111,12 +130,30 @@ func (r *ResultManager) IfError(f func(throwable *Throwable)) *ResultManager {
 	return r
 }
 
+// IfErrorThen the function will execute if error manager contain errors
+// and return the result of function
+func (r *ResultManager) IfErrorThen(f func(throwable *Throwable) interface{}) *ResultWrapper {
+	if r.errorManager.HaveError() {
+		return Wrap(f(r.errorManager.Throw()))
+	}
+	return Wrap(nil)
+}
+
 // IfNoResult the function will execute if this manager have empty result string
 func (r *ResultManager) IfNoResult(f func()) *ResultManager {
 	if !r.isResult {
 		f()
 	}
 	return r
+}
+
+// IfNoResultThen the function will execute if this manager have empty result string
+// and return the result of function
+func (r *ResultManager) IfNoResultThen(f func() interface{}) *ResultWrapper {
+	if !r.isResult {
+		return Wrap(f())
+	}
+	return Wrap(nil)
 }
 
 // IfResult the function will execute if this manager contain the result
@@ -128,6 +165,16 @@ func (r *ResultManager) IfResult(f func(string)) *ResultManager {
 	return r
 }
 
+// IfResultThen the function will execute if this manager contain the result
+// function parameter will be the latest result only
+// and return the result of function
+func (r *ResultManager) IfResultThen(f func(string) interface{}) *ResultWrapper {
+	if r.isResult {
+		return Wrap(f(r.GetResult()))
+	}
+	return Wrap(nil)
+}
+
 // IfAllResult the function will execute if this manager contain the result
 // function parameter will be all of saved result
 func (r *ResultManager) IfAllResult(f func([]string)) *ResultManager {
@@ -135,6 +182,16 @@ func (r *ResultManager) IfAllResult(f func([]string)) *ResultManager {
 		f(r.GetResults())
 	}
 	return r
+}
+
+// IfAllResultThen the function will execute if this manager contain the result
+// function parameter will be all of saved result
+// and return the result of function
+func (r *ResultManager) IfAllResultThen(f func([]string) interface{}) *ResultWrapper {
+	if r.isResult {
+		return Wrap(f(r.GetResults()))
+	}
+	return Wrap(nil)
 }
 
 func (r *ResultManager) addResult(s string) *ResultManager {

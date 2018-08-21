@@ -19,12 +19,14 @@ func TestThrowable(t *testing.T) {
 	Convey("Given empty Throwable", t, func() {
 		throw := manager.StartNewManageError().Throw()
 
-		Convey("Then cannot throw", func() {
-			So(throw.CanBeThrow(), ShouldBeFalse)
-		})
+		Convey("When call error methods", func() {
+			Convey("Then cannot be throw error", func() {
+				So(throw.CanBeThrow(), ShouldBeFalse)
+			})
 
-		Convey("And cannot get any error message", func() {
-			So(throw.GetMessage(), ShouldBeEmpty)
+			Convey("Then cannot get any error message", func() {
+				So(throw.GetMessage(), ShouldBeEmpty)
+			})
 		})
 	})
 
@@ -38,15 +40,17 @@ func TestThrowable(t *testing.T) {
 			AddNewError(addError).
 			Throw()
 
-		Convey("Then throwable", func() {
-			So(throw.CanBeThrow(), ShouldBeTrue)
-		})
+		Convey("When call getting error method", func() {
+			Convey("Then error can be throw", func() {
+				So(throw.CanBeThrow(), ShouldBeTrue)
+			})
 
-		Convey("And have error message", func() {
-			So(throw.GetMessage(), ShouldContainSubstring, "number1")
-			So(throw.GetMessage(), ShouldContainSubstring, "number2")
-			So(throw.GetMessage(), ShouldContainSubstring, "number3")
-			So(throw.GetMessage(), ShouldContainSubstring, "number4")
+			Convey("Then have error message", func() {
+				So(throw.GetMessage(), ShouldContainSubstring, "number1")
+				So(throw.GetMessage(), ShouldContainSubstring, "number2")
+				So(throw.GetMessage(), ShouldContainSubstring, "number3")
+				So(throw.GetMessage(), ShouldContainSubstring, "number4")
+			})
 		})
 
 		Convey("When set custom error message", func() {
@@ -58,7 +62,7 @@ func TestThrowable(t *testing.T) {
 				So(newThrow.GetMessage(), ShouldEqual, "Custom error message")
 			})
 
-			Convey("And can get the error message via GetCustomMessage", func() {
+			Convey("Then can get the error message via GetCustomMessage", func() {
 				message := throw.GetCustomMessage(func(err []error) string {
 					return "get error"
 				})

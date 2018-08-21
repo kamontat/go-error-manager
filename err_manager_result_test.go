@@ -13,12 +13,28 @@ func TestResultManager(t *testing.T) {
 	Convey("Given empty result manager", t, func() {
 		resultManager := manager.StartResultManager()
 
-		Convey("Then result should be empty", func() {
-			So(resultManager.GetResult(), ShouldBeEmpty)
-		})
+		Convey("When checking the result", func() {
+			Convey("Then the result should be empty", func() {
+				So(resultManager.GetResult(), ShouldBeEmpty)
+			})
 
-		Convey("And results list should be empty too", func() {
-			So(resultManager.GetResults(), ShouldHaveLength, 0)
+			Convey("Then results list should be empty too", func() {
+				So(resultManager.GetResults(), ShouldHaveLength, 0)
+			})
+
+			Convey("Then error will be empty", func() {
+				So(resultManager.HaveError(), ShouldBeFalse)
+
+				So(resultManager.NoError(), ShouldBeTrue)
+			})
+
+			Convey("Then the result in callback should be empty", func() {
+				result := resultManager.IfAllResultThen(func(i []string) interface{} {
+					return i
+				})
+
+				So(result.NotExist(), ShouldBeTrue)
+			})
 		})
 
 		Convey("When throw the error", func() {
@@ -47,12 +63,29 @@ func TestResultManager(t *testing.T) {
 						})
 					})
 
+					Convey("Then IfErrorThen will be executed", func() {
+						result := resultManager.IfErrorThen(func(throw *manager.Throwable) interface{} {
+							return "Hello world"
+						})
+						result.Unwrap(func(i interface{}) {
+							So(i, ShouldEqual, "Hello world")
+						})
+					})
+
 					Convey("Then IfNoError won't be executed", func() {
 						resultManager.IfNoError(func() {
 							So("Should fail", ShouldEqual, "IfNoError shouldn't run")
 						})
 
 						So(true, ShouldBeTrue)
+					})
+
+					Convey("Then IfNoErrorThen won't be executed", func() {
+						result := resultManager.IfNoErrorThen(func() interface{} {
+							return "Hello world"
+						})
+
+						So(result.NotExist(), ShouldBeTrue)
 					})
 
 					Convey("Then IfResult won't be executed", func() {
@@ -63,10 +96,26 @@ func TestResultManager(t *testing.T) {
 						So(true, ShouldBeTrue)
 					})
 
+					Convey("Then IfResultThen won't be executed", func() {
+						result := resultManager.IfResultThen(func(res string) interface{} {
+							return "Hello world"
+						})
+
+						So(result.NotExist(), ShouldBeTrue)
+					})
+
 					Convey("Then IfNoResult will be executed", func() {
 						resultManager.IfNoResult(func() {
 							So(true, ShouldBeTrue)
 						})
+					})
+
+					Convey("Then IfNoResultThen will be executed", func() {
+						result := resultManager.IfNoResultThen(func() interface{} {
+							return "Hello world"
+						})
+
+						So(result.Exist(), ShouldBeTrue)
 					})
 				})
 
@@ -85,10 +134,26 @@ func TestResultManager(t *testing.T) {
 						So(true, ShouldBeTrue)
 					})
 
+					Convey("Then IfErrorThen won't be executed", func() {
+						result := resultManager.IfErrorThen(func(throw *manager.Throwable) interface{} {
+							return "Hello world"
+						})
+
+						So(result.NotExist(), ShouldBeTrue)
+					})
+
 					Convey("Then IfNoError will be executed", func() {
 						resultManager.IfNoError(func() {
 							So(true, ShouldBeTrue)
 						})
+					})
+
+					Convey("Then IfNoErrorThen will be executed", func() {
+						result := resultManager.IfNoErrorThen(func() interface{} {
+							return "Hello #895"
+						})
+
+						So(result.Exist(), ShouldBeTrue)
 					})
 
 					Convey("Then IfResult won't be executed", func() {
@@ -99,10 +164,26 @@ func TestResultManager(t *testing.T) {
 						So(true, ShouldBeTrue)
 					})
 
+					Convey("Then IfResultThen won't be executed", func() {
+						result := resultManager.IfResultThen(func(s string) interface{} {
+							return "Hello #042"
+						})
+
+						So(result.NotExist(), ShouldBeTrue)
+					})
+
 					Convey("Then IfNoResult will be executed", func() {
 						resultManager.IfNoResult(func() {
 							So(true, ShouldBeTrue)
 						})
+					})
+
+					Convey("Then IfNoResultThen will be executed", func() {
+						result := resultManager.IfNoResultThen(func() interface{} {
+							return 657
+						})
+
+						So(result.Exist(), ShouldBeTrue)
 					})
 				})
 			})
@@ -175,12 +256,28 @@ func TestResultManager(t *testing.T) {
 						})
 					})
 
+					Convey("Then IfResultThen will be executed", func() {
+						result := resultManager.IfResultThen(func(s string) interface{} {
+							return "Hello #0764"
+						})
+
+						So(result.Exist(), ShouldBeTrue)
+					})
+
 					Convey("Then IfNoResult won't be executed", func() {
 						resultManager.IfNoResult(func() {
 							So("Should fail", ShouldEqual, "IfError shouldn't run")
 						})
 
 						So(true, ShouldBeTrue)
+					})
+
+					Convey("Then IfNoResultThen won't be executed", func() {
+						result := resultManager.IfNoResultThen(func() interface{} {
+							return true
+						})
+
+						So(result.NotExist(), ShouldBeTrue)
 					})
 				})
 			})
@@ -315,7 +412,7 @@ func TestResultManager(t *testing.T) {
 					So(resultManager.Throw().CanBeThrow(), ShouldBeFalse)
 				})
 
-				Convey("And result should be exist", func() {
+				Convey("Then result should be exist", func() {
 					result := resultManager.GetResult()
 
 					So(result, ShouldEqual, "Result #4567")
@@ -329,7 +426,7 @@ func TestResultManager(t *testing.T) {
 					So(resultManager.Throw().CanBeThrow(), ShouldBeTrue)
 				})
 
-				Convey("And result will be empty", func() {
+				Convey("Then result will be empty", func() {
 					result := resultManager.GetResult()
 					So(result, ShouldBeEmpty)
 				})
@@ -342,7 +439,7 @@ func TestResultManager(t *testing.T) {
 					So(resultManager.Throw().CanBeThrow(), ShouldBeTrue)
 				})
 
-				Convey("And result will be empty", func() {
+				Convey("Then result will be empty", func() {
 					result := resultManager.GetResult()
 					So(result, ShouldBeEmpty)
 				})
@@ -366,13 +463,21 @@ func TestResultManager(t *testing.T) {
 					So(resultManager.GetResults(), ShouldHaveLength, 2)
 				})
 
-				Convey("And Callback with all result should return all result", func() {
+				Convey("Then callback with all result should return all result", func() {
 					resultManager.IfAllResult(func(results []string) {
 						So(results, ShouldHaveLength, 2)
 						So(results, ShouldResemble, resultManager.GetResults())
 						So(results, ShouldContain, resultA)
 						So(results, ShouldContain, resultB)
 					})
+				})
+
+				Convey("Then callback with all result then, the result wrapper should be exist", func() {
+					result := resultManager.IfAllResultThen(func(results []string) interface{} {
+						return results
+					})
+
+					So(result.Exist(), ShouldBeTrue)
 				})
 			})
 		})
@@ -392,12 +497,12 @@ func TestResultManager(t *testing.T) {
 				So(oldResults, ShouldNotResemble, resultManager.GetResults())
 			})
 
-			Convey("And result manager should contain empty results", func() {
+			Convey("Then result manager should contain empty results", func() {
 				So(resultManager.GetResults(), ShouldBeEmpty)
 				So(resultManager.GetResults(), ShouldHaveLength, 0)
 			})
 
-			Convey("And the old one should contain previous results list", func() {
+			Convey("Then the old one should contain previous results list", func() {
 				So(oldResults, ShouldHaveLength, 2)
 				So(oldResults, ShouldContain, resultA)
 				So(oldResults, ShouldContain, resultB)

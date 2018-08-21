@@ -35,7 +35,7 @@ func TestErrorManager(t *testing.T) {
 				So(errorManager.HaveError(), ShouldBeTrue)
 			})
 
-			Convey("And counting must greater than 0", func() {
+			Convey("Then counting must greater than 0", func() {
 				So(errorManager.CountError(), ShouldBeGreaterThan, 0)
 			})
 		})
@@ -64,7 +64,7 @@ func TestErrorManager(t *testing.T) {
 				So(errorManager.HaveError(), ShouldBeTrue)
 			})
 
-			Convey("And errors list must be append", func() {
+			Convey("Then errors list must be append", func() {
 				So(errorManager.CountError(), ShouldEqual, 1)
 			})
 		})
@@ -76,7 +76,7 @@ func TestErrorManager(t *testing.T) {
 				So(errorManager.HaveError(), ShouldBeFalse)
 			})
 
-			Convey("And errors list should be empty", func() {
+			Convey("Then errors list should be empty", func() {
 				So(errorManager.CountError(), ShouldEqual, 0)
 			})
 		})
@@ -88,7 +88,7 @@ func TestErrorManager(t *testing.T) {
 				So(throw.CanBeThrow(), ShouldBeFalse)
 			})
 
-			Convey("And cannot get error message", func() {
+			Convey("Then cannot get error message", func() {
 				So(throw.GetMessage(), ShouldBeEmpty)
 			})
 		})
@@ -102,7 +102,7 @@ func TestErrorManager(t *testing.T) {
 				So(throw.CanBeThrow(), ShouldBeFalse)
 			})
 
-			Convey("And cannot get any error message", func() {
+			Convey("Then cannot get any error message", func() {
 				So(throw.GetMessage(), ShouldBeEmpty)
 			})
 		})
@@ -120,12 +120,12 @@ func TestErrorManager(t *testing.T) {
 				So(throw.CanBeThrow(), ShouldBeTrue)
 			})
 
-			Convey("And can get the error message", func() {
+			Convey("Then can get the error message", func() {
 				So(throw.GetMessage(), ShouldContainSubstring, "#1")
 				So(throw.GetMessage(), ShouldContainSubstring, "#2")
 			})
 
-			Convey("And it can reverse the throwable to Error manager", func() {
+			Convey("Then it can reverse the throwable to Error manager", func() {
 				newErrorManager := errorManager.UpdateByThrowable(throw)
 
 				So(newErrorManager.CountError(), ShouldEqual, 2)
@@ -141,7 +141,7 @@ func TestErrorManager(t *testing.T) {
 				So(throw.CanBeThrow(), ShouldBeTrue)
 			})
 
-			Convey("And can get the result as custom message", func() {
+			Convey("Then can get the result as custom message", func() {
 				So(throw.GetMessage(), ShouldEqual, "Hello world")
 			})
 		})
