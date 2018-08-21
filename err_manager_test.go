@@ -10,8 +10,19 @@ import (
 )
 
 func TestErrorManager(t *testing.T) {
+
 	Convey("Given Error manager", t, func() {
 		errorManager := manager.StartNewManageError()
+
+		Convey("When use short method", func() {
+			Convey("Then use NewE", func() {
+				errorManager1 := manager.NewE()
+				errorManager2 := manager.StartNewManageError()
+
+				So(errorManager1.HaveError(), ShouldEqual, errorManager2.HaveError())
+				So(errorManager1.CountError(), ShouldEqual, errorManager2.CountError())
+			})
+		})
 
 		Convey("When creating, is empty manager", func() {
 			Convey("Then error should not exist", func() {
@@ -29,7 +40,7 @@ func TestErrorManager(t *testing.T) {
 		})
 
 		Convey("When add new error", func() {
-			errorManager.AddNewError(errors.New("This is new error #1"))
+			errorManager.Add(errors.New("This is new error #1"))
 
 			Convey("Then a error must be exist", func() {
 				So(errorManager.HaveError(), ShouldBeTrue)
@@ -42,7 +53,7 @@ func TestErrorManager(t *testing.T) {
 
 		Convey("When add multiple errors", func() {
 			errorManager.AddNewError(errors.New("This is new error #1"))
-			errorManager.AddNewError(errors.New("This is new error #2"))
+			errorManager.Add(errors.New("This is new error #2"))
 
 			Convey("Then counting should be 2", func() {
 				So(errorManager.CountError(), ShouldEqual, 2)
@@ -70,7 +81,7 @@ func TestErrorManager(t *testing.T) {
 		})
 
 		Convey("When add error with empty string", func() {
-			errorManager.AddNewErrorMessage("")
+			errorManager.AddMessage("")
 
 			Convey("Then error checker should return false", func() {
 				So(errorManager.HaveError(), ShouldBeFalse)

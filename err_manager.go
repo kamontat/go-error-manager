@@ -22,6 +22,11 @@ func StartNewManageError() *ErrManager {
 	return newErrorManager()
 }
 
+// NewE will return new default ErrManager
+func NewE() *ErrManager {
+	return newErrorManager()
+}
+
 // SetError is tell the object that error exist. this will run when you add new error too
 func (e *ErrManager) SetError() *ErrManager {
 	e.isError = true
@@ -47,7 +52,7 @@ func (e *ErrManager) ReplaceNewError(err error) *ErrManager {
 	return e
 }
 
-// AddNewError will run when have error
+// AddNewError will run when error isn't nil
 func (e *ErrManager) AddNewError(err error) *ErrManager {
 	if err != nil {
 		e.SetError()
@@ -56,12 +61,22 @@ func (e *ErrManager) AddNewError(err error) *ErrManager {
 	return e
 }
 
+// Add will run when error isn't nil
+func (e *ErrManager) Add(err error) *ErrManager {
+	return e.AddNewError(err)
+}
+
 // AddNewErrorMessage will run when have error message
 func (e *ErrManager) AddNewErrorMessage(message string) *ErrManager {
 	if message != "" {
 		return e.AddNewError(errors.New(message))
 	}
 	return e
+}
+
+// AddMessage will run when have error message
+func (e *ErrManager) AddMessage(message string) *ErrManager {
+	return e.AddNewErrorMessage(message)
 }
 
 // UpdateByThrowable is use when you have throwable but you want to add more error

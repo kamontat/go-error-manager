@@ -8,9 +8,9 @@ type ResultManager struct {
 	errorManager *ErrManager
 }
 
-// New will create new Result manager,
+// NewR will create new Result manager,
 // you can use StartResultManager instead.
-func New() *ResultManager {
+func NewR() *ResultManager {
 	return &ResultManager{
 		errorManager: StartNewManageError(),
 		isResult:     false,
@@ -21,7 +21,7 @@ func New() *ResultManager {
 
 // StartResultManager will create new Result manager
 func StartResultManager() *ResultManager {
-	return New()
+	return NewR()
 }
 
 // Execute0ParametersA will run 'func()' that return 'error'
