@@ -158,6 +158,10 @@ func TestResultWrapper(t *testing.T) {
 			Convey("Then result should be exist", func() {
 				So(resultWrapper.Exist(), ShouldBeTrue)
 				So(resultWrapper.NotExist(), ShouldBeFalse)
+
+				Convey("And force unwrap won't be nil", func() {
+					So(resultWrapper.ForceUnwrap(), ShouldNotBeNil)
+				})
 			})
 		})
 

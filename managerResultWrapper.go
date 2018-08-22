@@ -17,6 +17,11 @@ func WrapNil() *ResultWrapper {
 	return Wrap(nil)
 }
 
+// ForceUnwrap will return the result instantly, so be aware
+func (r *ResultWrapper) ForceUnwrap() interface{} {
+	return r.result
+}
+
 // Unwrap will call the input function if and only if result is not null
 func (r *ResultWrapper) Unwrap(f func(interface{})) *ResultWrapper {
 	if r.Exist() {
