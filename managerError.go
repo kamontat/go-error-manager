@@ -10,23 +10,6 @@ type ErrManager struct {
 	err     []error
 }
 
-func newErrorManager() *ErrManager {
-	return &ErrManager{
-		isError: false,
-		err:     []error{},
-	}
-}
-
-// StartNewManageError will return new default ErrManager
-func StartNewManageError() *ErrManager {
-	return newErrorManager()
-}
-
-// NewE will return new default ErrManager
-func NewE() *ErrManager {
-	return newErrorManager()
-}
-
 // SetError is tell the object that error exist. this will run when you add new error too
 func (e *ErrManager) SetError() *ErrManager {
 	e.isError = true

@@ -12,12 +12,12 @@ import (
 func TestErrorManager(t *testing.T) {
 
 	Convey("Given Error manager", t, func() {
-		errorManager := manager.StartNewManageError()
+		errorManager := manager.StartErrorManager()
 
 		Convey("When use short method", func() {
 			Convey("Then use NewE", func() {
 				errorManager1 := manager.NewE()
-				errorManager2 := manager.StartNewManageError()
+				errorManager2 := manager.StartErrorManager()
 
 				So(errorManager1.HaveError(), ShouldEqual, errorManager2.HaveError())
 				So(errorManager1.CountError(), ShouldEqual, errorManager2.CountError())
@@ -120,7 +120,7 @@ func TestErrorManager(t *testing.T) {
 	})
 
 	Convey("Given error manager with errors", t, func() {
-		errorManager := manager.StartNewManageError()
+		errorManager := manager.NewE()
 		errorManager.AddNewError(errors.New("This is new error #1"))
 		errorManager.AddNewError(errors.New("This is new error #2"))
 

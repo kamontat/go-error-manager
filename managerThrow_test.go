@@ -17,7 +17,7 @@ import (
 
 func TestThrowable(t *testing.T) {
 	Convey("Given empty Throwable", t, func() {
-		throw := manager.StartNewManageError().Throw()
+		throw := manager.StartErrorManager().Throw()
 
 		Convey("When call error methods", func() {
 			Convey("Then cannot be throw error", func() {
@@ -32,7 +32,7 @@ func TestThrowable(t *testing.T) {
 
 	Convey("Given custom Throwable", t, func() {
 		addError := errors.New("Adding error")
-		throw := manager.StartNewManageError().
+		throw := manager.StartErrorManager().
 			AddNewErrorMessage("Error number1").
 			AddNewErrorMessage("Error number2").
 			AddNewErrorMessage("Error number3").

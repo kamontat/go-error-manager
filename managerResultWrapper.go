@@ -42,7 +42,7 @@ func (r *ResultWrapper) Catch(f func() error, exception func(t *Throwable)) *Thr
 	}
 
 	e := f()
-	t := StartNewManageError().Add(e).Throw()
+	t := StartErrorManager().Add(e).Throw()
 
 	if exception != nil && t.CanBeThrow() {
 		exception(t)
