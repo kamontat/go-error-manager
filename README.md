@@ -1,6 +1,4 @@
-# Error manager 
-[![GitHub tag](https://img.shields.io/github/tag/kamontat/go-error-manager.svg?style=flat-square)](https://github.com/kamontat/go-error-manager/releases) 
-[![GitHub release](https://img.shields.io/github/release/kamontat/go-error-manager.svg?style=flat-square)](https://github.com/kamontat/go-error-manager/releases)
+# Error manager [![GitHub tag](https://img.shields.io/github/tag/kamontat/go-error-manager.svg?style=flat-square)](https://github.com/kamontat/go-error-manager/releases) [![GitHub release](https://img.shields.io/github/release/kamontat/go-error-manager.svg?style=flat-square)](https://github.com/kamontat/go-error-manager/releases)
 
 [![CircleCI](https://img.shields.io/circleci/project/github/kamontat/go-error-manager.svg?style=flat-square)](https://circleci.com/gh/kamontat/go-error-manager) [![Codecov](https://img.shields.io/codecov/c/github/kamontat/go-error-manager.svg?style=flat-square)](https://codecov.io/gh/kamontat/go-error-manager) [![Go Report Card](https://goreportcard.com/badge/github.com/kamontat/go-error-manager)](https://goreportcard.com/report/github.com/kamontat/go-error-manager)
 
