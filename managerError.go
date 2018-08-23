@@ -49,6 +49,14 @@ func (e *ErrManager) Add(err error) *ErrManager {
 	return e.AddNewError(err)
 }
 
+// Adds will add all errors
+func (e *ErrManager) Adds(errs []error) *ErrManager {
+	for _, err := range errs {
+		e.AddNewError(err)
+	}
+	return e
+}
+
 // AddNewErrorMessage will run when have error message
 func (e *ErrManager) AddNewErrorMessage(message string) *ErrManager {
 	if message != "" {

@@ -17,6 +17,17 @@ type Throwable struct {
 	message string
 }
 
+// SCode is setter exit code
+func (t *Throwable) SCode(code int) *Throwable {
+	t.code = code
+	return t
+}
+
+// GCode is getter exit code
+func (t *Throwable) GCode() int {
+	return t.code
+}
+
 // CanBeThrow will return boolean, is throwable can be throw
 func (t *Throwable) CanBeThrow() bool {
 	return !t.isEmpty && len(t.err) > 0
@@ -80,6 +91,22 @@ func createErrorMessage(errs []error) string {
 		str += fmt.Sprintf("\t %d) %s\n", i, err.Error())
 	}
 	return str
+}
+
+// ThrowError is method to create throwable with customize config
+func ThrowError(e error, message MessageGenerator, code int) *Throwable {
+	if message == nil {
+		message = createErrorMessage
+	}
+
+	es := []error{e}
+
+	return &Throwable{
+		code:    code,
+		err:     es,
+		isEmpty: false,
+		message: message(es),
+	}
 }
 
 func createThrowable(errs []error, message MessageGenerator) *Throwable {

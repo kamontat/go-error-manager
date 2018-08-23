@@ -52,8 +52,10 @@ func TestErrorManager(t *testing.T) {
 		})
 
 		Convey("When add multiple errors", func() {
-			errorManager.AddNewError(errors.New("This is new error #1"))
-			errorManager.Add(errors.New("This is new error #2"))
+			er1 := errors.New("This is new error #1")
+			er2 := errors.New("This is new error #2")
+
+			errorManager.Adds([]error{er1, er2})
 
 			Convey("Then counting should be 2", func() {
 				So(errorManager.CountError(), ShouldEqual, 2)

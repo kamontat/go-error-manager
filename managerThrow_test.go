@@ -115,26 +115,45 @@ func TestThrowable(t *testing.T) {
 		})
 
 		Convey("When exit the program via Exit method", func() {
-			var run = false
+			var run = 0
 			p := monkey.Patch(os.Exit, func(n int) {
-				if n == 1 {
-					run = true
-				} else if n == 123 {
-					run = true
-				}
+				run = n
 			})
 
 			Convey("Then os.Exit should be run with default error code", func() {
 				throw.Exit()
-				So(run, ShouldBeTrue)
+				So(run, ShouldEqual, 1)
+			})
+
+			Convey("Then update exit code via SCode", func() {
+				throw.SCode(50)
+				So(throw.GCode(), ShouldEqual, 50)
+
+				Convey("Then os.Exit should be run with setter code", func() {
+					throw.Exit()
+					So(run, ShouldEqual, 50)
+				})
 			})
 
 			Convey("Then os.Exit should be run with custom error code", func() {
 				throw.ExitWithCode(123)
-				So(run, ShouldBeTrue)
+				So(run, ShouldEqual, 123)
 			})
 
 			p.Unpatch()
+		})
+	})
+
+	Convey("Given custom Throwable", t, func() {
+		Convey("When created by ThrowError", func() {
+			e := errors.New("error #0192")
+			t := manager.ThrowError(e, nil, 77)
+
+			Convey("Then throwable should have config same as input", func() {
+				So(t.CanBeThrow(), ShouldBeTrue)
+				So(t.ListErrors(), ShouldContain, e)
+				So(t.GCode(), ShouldEqual, 77)
+			})
 		})
 	})
 }
