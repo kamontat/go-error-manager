@@ -15,12 +15,12 @@ The principle of the code is always continue and chainable. Most of the function
 ### ErrManager
 
 1. The Error manager (`ErrManager`) is for management error and exception in golang. you can use it via
-    2. `StartNewManageError()` return absolute new object
+    1. `StartNewManageError()` return absolute new object
 2. After that, several method that can chain
-    3. `SetError()` tell error manager that have error inside (auto called)
-    4. `ReplaceNewError(error)` delete all error collection and add new one
-    5. `AddNewError(error)` append error to collection
-    6. `AddNewErrorMessage(string)` append error message to collection
+    1. `SetError()` tell error manager that have error inside (auto called)
+    2. `ReplaceNewError(error)` delete all error collection and add new one
+    3. `AddNewError(error)` append error to collection
+    4. `AddNewErrorMessage(string)` append error message to collection
 3. To summary or get the result, you can use
     1. `HaveError()` check is error inside
     2. `CountError()` get length of error collection
